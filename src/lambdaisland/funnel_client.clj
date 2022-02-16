@@ -13,6 +13,8 @@
                    :platform-type "jvm"
                    :working-directory (System/getProperty "user.dir")}))
 
+(defn funnel-client-ssl-context [])
+
 (defn funnel-uri []
   ;; Using the regular ws connection, rather than wss/ssl, since otherwise we
   ;; need to load up the CA cert that funnel uses, which I haven't figured out
@@ -81,6 +83,9 @@
                                  :remote? remote?}))
                (meta []
                  opts))]
+    (when-let [ssl-context (funnel-client-ssl-context)]
+      (.setSocketFactory conn 
+        (.getSocketFactory ssl-context)))
     (when-not (.connectBlocking conn 2 java.util.concurrent.TimeUnit/SECONDS)
       (throw (ex-info "Failed connecting to Funnel, is it running?" {:uri uri})))
     conn))
